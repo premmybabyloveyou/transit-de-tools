@@ -1,1 +1,36 @@
+## คู่มือการใช้งาน Project Transit DE Tools ตั้งแต่การติดตั้ง envoriment จนไปถึงการรัน map และ data pipline ##
 
+1.(Prerequisite & Setup)
+ก่อนเริ่มใช้งาน ตรวจสอบให้แน่ใจว่ามีไฟล์ชุดข้อมูล Bangkok GTFS ( stop.txt , routes.txt , shapes.txt , trips.txt ) อยู่ใน floder data/gtfs จากนั่นรันคำสั่งติดตั้ง Dependencies ใน terminal ของ vs code
+(## npm install ##)
+(## python3 -m venv .venv
+soure .venv/bin/activate
+pip install netwrokx pandas scipy ##)
+
+2.(การเปิดใช้งาน Extension และ map (Live GTFS Map)
+1.เปิด Floder Project transit-de-tools ใน vs code 
+2. ไปที่เมนู Run > Start Debugging เพื่อเปิดหน้าต่างใหม่ชื่อ [Extension Development Host]
+3.ในหน้าต่างใหม่ของ vs code ให้คลิก icon Transit DE Tools บนแถบ Activity Bar ด้านซ้ายมือ
+4.คลิกปุ่มคำสั่ง Open Live Stream & GTFS Map เพื่อเปิดหน้าต่างแผนที่ Webview (Leaflet)
+> แผนที่จะโหลดจุดจอดขนส่งสาธารณะกว่า 17,000 จุดเส้นทางเดินรถขึ้นมาแสดงผลบนแผนที่หรุงเทพ
+
+3.การใช้ feature วิเคราะห์ข้อมูลบนแผนที่ (Core Features) 
+## เมื่อเปิดหน้าต่างแผนที่ขึ้นมา สามรถใช้งานเครื่องมือวิเคราะห์หลักได้ 3 ส่วน ## 
+
+# คำนวณเส้นทางต่อรถ (Multimodal Shortest Path): 
+วิธีใช้งาน: คลิกเลือกจุดต้นทาง (Origin) และปลายทาง (Destination) บนแผนที่โดยตรง (ระบบจะสร้างวงกลม Walking Buffer Zone รัศมี 500 เมตรรอบจุดที่เลือก) หรือเลือกชื่อป้ายจากเมนู Dropdown
+ผลลัพธ์: สคริปต์ route_engine.py จะคำนวณเส้นทางที่สั้นที่สุดผ่านโครงข่ายกราฟ NetworkX และวาดเส้นสีเขียวสด (#00e676) เชื่อมต่อตามลำดับสถานีจริง
+
+# วิเคราะห์จุดอับและจุดเชื่อมต่อ (Density Heatmap):
+วิธีใช้งาน: กดปุ่มสลับโหมดการแสดงผลจากหมุดสถานี (Markers) เป็นแผนที่ความร้อน (Heatmap)
+ผลลัพธ์: ระบุพื้นที่ Transit Deserts (โซนสีเย็น/โปร่งใสที่ขาดแคลนระบบขนส่งมวลชน) และ Transit Hotspots / Interchange Hubs (โซนสีร้อนที่จุดเชื่อมต่อกระจุกตัวหนาแน่น)
+
+# กรองข้อมูลตามสายเดินรถ (Route Line Filter):
+วิธีใช้งาน: เลือกสายรถเมล์หรือระบบขนส่งที่ต้องการจากตัวกรอง (เช่น ขสมก. เขต 1, BTS, MRT)
+ผลลัพธ์: แผนที่จะกรองแสดงเฉพาะเส้นทางและป้ายของสายนั้น พร้อมปรับระดับการซูม (Auto-Zoom) ให้พอดีกับเส้นทาง
+
+4.การรัน Data Pipeline (ETL Task)
+ใช้สำหรับทำความสะอาดข้อมูลดิบและแปลงโครงสร้างข้อมูลให้พร้อมนำไปใช้งานต่อในระบบภูมิสารสนเทศ (GIS) หรือ API:
+1.ในแถบเมนู Transit DE Tools ด้านซ้ายมือ ให้คลิกคำสั่ง Run Airflow ETL Pipeline
+2.ระบบจะเรียกทำงานสคริปต์ validate_gtfs.py เพื่อตรวจสอบความถูกต้องของพิกัด (Data Validation & Cleaning) และแปลงโครงสร้างข้อมูล
+การตรวจสอบ: มีไฟล์ผลลัพธ์มาตรฐานภูมิศาสตร์ stops.geojson และ routes.geojson ถูกสร้างขึ้นใหม่ในโฟลเดอร์ data/ พร้อมข้อความแจ้งเตือนสถานะสำเร็จใน VS Code
